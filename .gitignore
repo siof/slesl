@@ -1,0 +1,6 @@
+*.sdf
+*.opensdf
+VS/Debug/
+VS/Release/
+bin
+obj
