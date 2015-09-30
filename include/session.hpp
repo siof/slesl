@@ -23,7 +23,7 @@ namespace snesl
 
         asio::ip::tcp::socket & GetSocket();
 
-        void ConnectionStarted(unsigned long long id);
+        void ConnectionStarted(uint64_t id);
 
         void HandleReadSize(const asio::error_code& error, const size_t& /*bytes*/);
         void HandleReadMsg(const asio::error_code& error, const size_t& /*bytes*/);

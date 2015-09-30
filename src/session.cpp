@@ -21,7 +21,7 @@ namespace snesl
         return _socket;
     }
 
-    void Session::ConnectionStarted(unsigned long long id)
+    void Session::ConnectionStarted(uint64_t id)
     {
         _sessionId = id;
         asio::async_read(_socket, asio::buffer(&_readSize, 4), std::bind(&Session::HandleReadSize, this, std::placeholders::_1, std::placeholders::_2));
@@ -61,7 +61,7 @@ namespace snesl
             return;
 
         auto msg = _writeMsgs.front();
-        asio::async_write(_socket, msg, std::bind(&Session::HandleWrite, this, std::placeholders::_1, std::placeholders::_2));
+        asio::async_write(_socket, asio::buffer(msg), std::bind(&Session::HandleWrite, this, std::placeholders::_1, std::placeholders::_2));
     }
 
     uint64_t Session::GetSessionId()

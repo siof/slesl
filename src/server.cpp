@@ -2,6 +2,7 @@
 
 #include <functional>
 
+#include "binaryostream.hpp"
 #include "session.hpp"
 
 namespace snesl
@@ -17,8 +18,21 @@ namespace snesl
         Bind(ipAddress, port);
     }
 
-    void Server::Bind()
+    void Server::Run()
     {
+        AcceptNewConnection();
+
+        for (auto i = 0; i < _connectorsCount; ++i)
+            _connectors.push_back(std::thread([this] { _service.run(); }));
+    }
+
+    void Server::Bind(std::string address, uint32_t port)
+    {
+        Unbind();
+
+        _listenAddress = address;
+        _listenPort = port;
+
         asio::ip::tcp::resolver resolver(_service);
         asio::ip::tcp::resolver::query query(_listenAddress, std::to_string(_listenPort));
         asio::ip::tcp::endpoint endpoint = *resolver.resolve(query);
@@ -29,34 +43,17 @@ namespace snesl
         _acceptor.listen(/*asio::socket_base::max_connections*/);
     }
 
-    void Server::Bind(std::string address, uint32_t port)
-    {
-        _listenAddress = address;
-        _listenPort = port;
-
-        Bind();
-    }
-
-    void Server::Run()
-    {
-        AcceptNewConnection();
-
-        for (auto i = 0; i < _connectorsCount; ++i)
-            _connectors.push_back(std::thread([this] { _service.run(); }));
-    }
-
-    void Server::Run(std::string ipAddress, uint32_t port)
-    {
-        Bind(ipAddress, port);
-        Run();
-    }
-
     void Server::Stop()
+    {
+        StopAcceptor();
+        _service.stop();
+    }
+
+    void Server::StopAcceptor()
     {
         asio::error_code ec;
         _acceptor.cancel();
         _acceptor.close(ec);
-        _service.stop();
     }
 
     uint32_t Server::GetListenPort()
@@ -96,5 +93,14 @@ namespace snesl
 
         _sessionManager->StartSession(session);
         AcceptNewConnection();
+    }
+
+    void Server::Unbind()
+    {
+        if (_acceptor.is_open())
+        {
+            asio::error_code ec;
+            _acceptor.close(ec);
+        }
     }
 }

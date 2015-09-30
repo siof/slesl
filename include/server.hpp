@@ -31,13 +31,12 @@ namespace snesl
 
         Server& operator =(Server&) = delete;
 
-        void Bind();
         void Bind(std::string, uint32_t);
 
         void Run();
-        void Run(std::string, uint32_t);
 
         void Stop();
+        void StopAcceptor();
 
         uint32_t GetListenPort();
         std::string GetListenAddress();
@@ -61,5 +60,7 @@ namespace snesl
 
         void AcceptNewConnection();
         void HandleNewConnection(std::shared_ptr<Session>, const asio::error_code&);
+
+        void Unbind();
     };
 }
